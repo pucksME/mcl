@@ -62,6 +62,8 @@ def check_model_performance(model, test_images, test_labels):
 
 def main():
     (train_images, train_labels), (test_images, test_labels) = get_train_data()
+    print(len(test_images))
+    print(len(test_labels))
 
     try:
         model = keras.models.load_model('model.keras')

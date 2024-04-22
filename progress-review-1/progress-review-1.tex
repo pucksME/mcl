@@ -1,0 +1,42 @@
+\documentclass{article}
+\author{Sebastian Puck, Lukas Schilcher}
+\date{Summer Term 2024}
+\title{Mobile Computing Laboratory\\Progress Review 1}
+
+\begin{document}
+\maketitle
+\section{Application Overview}
+% state overview regarding what the application does
+The general concept of the application is the authentication or - in more general terms - classification of known user-person mappings by analyzing movement patterns. More specifically, on a specific smartphone, the app should classify the currently active user by observing data related to movement categories such as walking, running or driving where the active user's behavior is derived from the device's sensors.
+
+The purpose of this classification procedure is to serve features such as authentication based on the person that is currently operating the smartphone. Beyond that, there may be more complex states attached to active users by for instance indicating if a certain user currently is walking, running or driving.
+
+\section{Questions And Answers}
+\subsection{What is the state-of-the-art}
+% describe state-of-the-art that is relevant for the app
+% list methods with solutions to similar problems
+
+\subsection{Approach}
+% describe why e.g. a specific machine learning approach was chosen
+% list alternatives
+
+\subsection{Techniques}
+% describe used techniques used in app
+% list used data sets / theory, assumptions / principles / research results
+% state if there exists a model that can be considered for pretraining
+% state how data is collected, processed and labeled
+\subsubsection{Learning user-person mappings}
+Conceptually, the application should support adding a new user which then initially can be marked to observe the movement patterns of the person that is currently using the smartphone. Therefore, the application constructs a mapping between the newly created user and the person carrying the smartphone. When the learning process is finished - either manually or by automatically letting the application decide - the initial marking is removed. If there is no marked user, the app will use the device's sensors to classify the active user. Further, to provide features such as authentication, there is additional data associated with users determining aspects such as individual permissions.
+
+\subsection{Results}
+% state if there are already some results: gathered data, trained model, confusion matrix, ...
+
+\subsection{Implementation}
+% state current implementation of app and its ui
+% state how work is distributed within the team
+For working on the project, it is planned to distribute the workload equally.
+
+\bibliographystyle{plain}
+\bibliography{sources.bib}
+
+\end{document}
