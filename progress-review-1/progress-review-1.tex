@@ -1,4 +1,5 @@
-\documentclass{article}
+\documentclass[a4paper,10pt]{article}
+
 \author{Sebastian Puck, Lukas Schilcher}
 \date{Summer Term 2024}
 \title{Mobile Computing Laboratory\\Progress Review 1}
@@ -12,31 +13,76 @@ The general concept of the application is the authentication or - in more genera
 The purpose of this classification procedure is to serve features such as authentication based on the person that is currently operating the smartphone. Beyond that, there may be more complex states attached to active users by for instance indicating if a certain user currently is walking, running or driving.
 
 \section{Questions And Answers}
-\subsection{What is the state-of-the-art}
 % describe state-of-the-art that is relevant for the app
 % list methods with solutions to similar problems
 
 \subsection{Approach}
-% describe why e.g. a specific machine learning approach was chosen
-% list alternatives
+\textbf{Machine Learning Notes}: We are still deciding on which specific model and architecture we will use, however as we are dealing with sequential (thus non-iid) data, we are only considering models suitable for time series classification, such as LSTMs.
+For now, we assume that we will use an LSTM and possibly a Dynamic Time Warping (DTW) algorithm for the classification of the gait cycles \cite{AVOLA2024103643}. We will, if necessary, use other models and techniques as we progress with the project.
+Our approach will use incremental learning, where the model can be trained in steps, and the model will be updated with new data as it becomes available. This will allow the model to adapt to changes in the user's gait over time, as well as handle new users.
+The implications of this incremental learning approach are still being discussed (e.g. learning rate decay, true online-learning vs batch learning, regularization, etc.).
+
+\subsection{What is the state-of-the-art}
+As per \cite{AVOLA2024103643}, there are currently two main classes of approaches for gait classification: \begin{itemize}
+    \item Machine and Deep Learning based approaches (high accuracy, sometimes lack generalization)
+    \item Approaches using hand-crafted features (lower accuracy, generally more robust)
+\end{itemize}
+In the above paper, the authors propose a hand-crafted approach using a modified variant of Dynamic Time Warping to classify gait cycles, which outperforms the (back then) SOTA deep learning models.
+In our project, we want to explore a hybrid approach, where we use a deep learning model to classify the gait cycles and then use DTW to further refine the classification.
 
 \subsection{Techniques}
 % describe used techniques used in app
-% list used data sets / theory, assumptions / principles / research results
-% state if there exists a model that can be considered for pretraining
-% state how data is collected, processed and labeled
+\subsubsection{Signal to Classification Model Pipeline}
+\begin{itemize}
+    \item Sensors: Synchronized collection (with fixed sampling rate) of signals from (at least) the following sensors: \begin{itemize}
+        \item Accelerometer (TYPE\_ACCELEROMETER): Primary sensor for capturing movement data.
+        \item Gravity (TYPE\_GRAVITY): Helps in isolating movement-related acceleration from the static acceleration due to gravity by removing it from the accelerometer data.
+    \end{itemize}
+    \item Preprocessing: \begin{itemize}
+        \item Noise reduction: Low-pass filter, \dots
+        \item Normalize the signals
+    \end{itemize}
+    \item Data Fusion and Feature Extraction:
+    \begin{itemize}
+        \item Calculate the magnitude of the pure acceleration vector after gravity compensation to serve as a unified feature set.
+        \item Segment the resultant signal into windows that represent individual gait cycles, which will be used as input for the classification model.
+    \end{itemize}
+    \item Model Training and Inference:
+    \begin{itemize}
+        \item Training: Train the LSTM model with the preprocessed data from different users.
+        \item Real-time inference: Deploy the LSTM to classify new gait cycles in real-time. Use Dynamic Time Warping (DTW) after initial LSTM classification to further refine and confirm user identity based on their unique gait signature.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Pretrained Model or Training from Scratch}
+For our purpose, we will train the model from scratch, as the data we are working with is unique to each user and the model needs to be able to adapt to changes in the user's gait over time. 
+We will use the collected data to train the model and then update the model with new data as it becomes available.
+Additionally, if we were to introduce a pretrained model \begin{itemize}
+    \item we would need to ensure that the model is trained on a similar dataset to ours
+    \item the probability of misclassification would be higher with more users, as the gait patterns of different users inherently do not differ significantly. For our current use-case, large scale classification is not intended.
+\end{itemize}
+
 \subsubsection{Learning user-person mappings}
 Conceptually, the application should support adding a new user which then initially can be marked to observe the movement patterns of the person that is currently using the smartphone. Therefore, the application constructs a mapping between the newly created user and the person carrying the smartphone. When the learning process is finished - either manually or by automatically letting the application decide - the initial marking is removed. If there is no marked user, the app will use the device's sensors to classify the active user. Further, to provide features such as authentication, there is additional data associated with users determining aspects such as individual permissions.
 
 \subsection{Results}
-% state if there are already some results: gathered data, trained model, confusion matrix, ...
+We currently are still in the planning phase, as once we start implementing the ml model, changes in architecture result in a lot of overhead. Thus, we need to have a clear plan beforehand.
 
 \subsection{Implementation}
-% state current implementation of app and its ui
-% state how work is distributed within the team
+\subsubsection{Planned Stack}
+\begin{itemize}
+    \item Android Studio: For developing the Android application.
+    \item TensorFlow (+TFLite): For building and training the LSTM model.
+    \item SQLite: For storing user data and movement patterns.
+    \item To be discussed: \begin{itemize}
+        \item Flutter + Dart
+        \item Default + Kotlin
+    \end{itemize}
+\end{itemize}
+
 For working on the project, it is planned to distribute the workload equally.
 
-\bibliographystyle{plain}
-\bibliography{sources.bib}
+\bibliographystyle{apalike}
+\bibliography{sources}
 
 \end{document}
