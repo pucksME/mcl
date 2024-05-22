@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val users = remember {
-                        mutableStateListOf(User("Hans", true), User("Fritz", false))
+                        mutableStateListOf(User("User 1", true), User("User 2", false))
                     }
 
                     Column {
