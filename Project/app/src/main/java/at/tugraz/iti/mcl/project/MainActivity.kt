@@ -19,14 +19,19 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import at.tugraz.iti.mcl.project.ui.theme.ProjectTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,7 +62,12 @@ class MainActivity : ComponentActivity() {
                         mutableStateListOf(User("User 1", true), User("User 2", false))
                     }
 
+                    val deleteUserDialogVisible = remember {
+                        mutableStateOf(false)
+                    }
+
                     Column {
+                        DeleteUserDialog(deleteUserDialogVisible)
                         Title()
                         CreateUserForm(users)
                         UserList(users)
@@ -123,7 +135,10 @@ fun UserList(users: SnapshotStateList<User>) {
 
 @Composable
 fun UserListItem(user: User, users: SnapshotStateList<User>) {
-    Column (modifier = Modifier.padding(vertical = 5.dp).background(color = Color(red = 240, green = 240, blue = 245)).padding(vertical = 35.dp)) {
+    Column (modifier = Modifier
+        .padding(vertical = 5.dp)
+        .background(color = Color(red = 240, green = 240, blue = 245))
+        .padding(vertical = 35.dp)) {
         Row (modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 10.dp)
             .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
@@ -144,4 +159,21 @@ fun UserListItem(user: User, users: SnapshotStateList<User>) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeleteUserDialog(visible: MutableState<Boolean>) {
+    AlertDialog(
+        icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null )},
+        title = { Text(text = "Delete User")},
+        text = { Text(text = "Do you really want to delete this user?")},
+        confirmButton = { TextButton(onClick = { visible.value = false }) {
+            Text(text = "Delete")
+        }},
+        dismissButton = { TextButton(onClick = { visible.value = false }) {
+            Text(text = "Cancel")
+        }},
+        onDismissRequest = { visible.value = false }
+    );
 }
