@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,6 +44,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -252,6 +255,14 @@ fun DeleteUserDialog(deleteUserDialogUser: MutableState<String>, users: Snapshot
     );
 }
 
+@Composable
+fun IconButton(imageVector: ImageVector, text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(onClick = onClick, modifier = modifier) {
+        Icon(imageVector = imageVector, contentDescription = null, modifier = Modifier.size(18.dp))
+        Text(text = text, modifier = Modifier.padding(start = 5.dp))
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: MutableState<String>) {
@@ -260,12 +271,22 @@ fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: Muta
     }
 
     ModalBottomSheet(onDismissRequest = { userDetailsUser.value = null }) {
-        Column {
-            UserInformation(user = userDetailsUser.value)
-        }
-        Column {
-            Button(onClick = { deleteUserDialogUser.value = userDetailsUser.value!!.firstName }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+        Column(modifier = Modifier
+            .padding(bottom = 50.dp)
+            .padding(horizontal = 25.dp)) {
+            Column {
+                UserInformation(user = userDetailsUser.value)
+            }
+            Column(modifier = Modifier.padding(top = 10.dp)) {
+                Row {
+                    IconButton(imageVector = Icons.Default.Build, text = "Learn", onClick = {})
+                    IconButton(
+                        imageVector = Icons.Default.Delete,
+                        text = "Delete",
+                        onClick = { deleteUserDialogUser.value = userDetailsUser.value!!.firstName },
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                }
             }
         }
     }
