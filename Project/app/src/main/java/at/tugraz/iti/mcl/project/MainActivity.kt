@@ -69,13 +69,17 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf<User?>(null)
                     }
 
-                    Scaffold (floatingActionButton = { AddUser() }){ innerPadding ->
+                    val createUserFormVisible = remember {
+                        mutableStateOf(false)
+                    }
+
+                    Scaffold (floatingActionButton = { AddUser(createUserFormVisible) }){ innerPadding ->
                         Column (modifier = Modifier.padding(innerPadding)){
                             DeleteUserDialog(deleteUserDialogUser, users, userDetailsUser)
                             UserDetails(userDetailsUser, deleteUserDialogUser)
+                            CreateUserForm(users, createUserFormVisible)
                             // AddUser()
                             Title()
-                            CreateUserForm(users)
                             UserList(users, userDetailsUser)
                         }
                     }
@@ -116,17 +120,58 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun CreateUserForm(users: SnapshotStateList<User>) {
+fun Heading(text: String) {
+    Text(text = text, fontSize = 25.sp, modifier = Modifier.padding(bottom = 25.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateUserForm(users: SnapshotStateList<User>, createUserFormVisible: MutableState<Boolean>) {
+    if (!createUserFormVisible.value) {
+        return
+    }
+
     var firstname by remember {
         mutableStateOf("")
     }
 
-    Row (modifier = Modifier
-        .padding(horizontal = 10.dp)
-        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-        TextField(value = firstname, onValueChange = {value -> firstname = value}, label = {Text("First name")})
-        Button(onClick = { users.add(User(firstname, false)) }) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+    ModalBottomSheet(onDismissRequest = { createUserFormVisible.value = false }) {
+        val invalidInput = remember {
+            mutableStateOf(false)
+        }
+
+        Column(modifier = Modifier
+            .padding(bottom = 50.dp)
+            .padding(horizontal = 25.dp)) {
+            Heading(text = "Register User")
+            Column(modifier = Modifier
+                .fillMaxWidth()){
+                TextField(
+                    value = firstname,
+                    onValueChange = {value -> firstname = value},
+                    label = {Text("First name")},
+                    isError = invalidInput.value,
+                    supportingText = { if (invalidInput.value) Text(text = "Please choose a name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(onClick = {
+                    if (firstname.isEmpty()) {
+                        invalidInput.value = true
+                    } else {
+                        invalidInput.value = false
+                        users.add(User(firstname, false))
+                        createUserFormVisible.value = false
+                    }
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)) {
+                    Row(modifier = Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                        Text(text = "Add new user".uppercase(), modifier = Modifier.padding(start = 2.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -227,8 +272,8 @@ fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: Muta
 }
 
 @Composable
-fun AddUser() {
-    FloatingActionButton(onClick = { /*TODO*/ }, shape = CircleShape) {
+fun AddUser(createUserFormVisible: MutableState<Boolean>) {
+    FloatingActionButton(onClick = { createUserFormVisible.value = true }, shape = CircleShape) {
         Icon(imageVector = Icons.Default.Add, contentDescription = null)
     }
 }
