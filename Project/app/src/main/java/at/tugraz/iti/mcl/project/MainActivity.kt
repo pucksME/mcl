@@ -9,23 +9,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,8 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import at.tugraz.iti.mcl.project.ui.theme.ProjectTheme
 
 class MainActivity : ComponentActivity() {
@@ -62,15 +61,23 @@ class MainActivity : ComponentActivity() {
                         mutableStateListOf(User("User 1", true), User("User 2", false))
                     }
 
-                    val deleteUserDialogVisible = remember {
-                        mutableStateOf(false)
+                    val deleteUserDialogUser = remember {
+                        mutableStateOf("")
                     }
 
-                    Column {
-                        DeleteUserDialog(deleteUserDialogVisible)
-                        Title()
-                        CreateUserForm(users)
-                        UserList(users)
+                    val userDetailsUser = remember {
+                        mutableStateOf<User?>(null)
+                    }
+
+                    Scaffold (floatingActionButton = { AddUser() }){ innerPadding ->
+                        Column (modifier = Modifier.padding(innerPadding)){
+                            DeleteUserDialog(deleteUserDialogUser, users, userDetailsUser)
+                            UserDetails(userDetailsUser, deleteUserDialogUser)
+                            // AddUser()
+                            Title()
+                            CreateUserForm(users)
+                            UserList(users, userDetailsUser)
+                        }
                     }
                 }
             }
@@ -125,16 +132,41 @@ fun CreateUserForm(users: SnapshotStateList<User>) {
 }
 
 @Composable
-fun UserList(users: SnapshotStateList<User>) {
+fun UserList(users: SnapshotStateList<User>, userDetailsUser: MutableState<User?>) {
     Column (modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp)){
         for (user in users) {
-            UserListItem(user = user, users)
+            UserListItem(user = user, users, userDetailsUser)
         }
     }
 }
 
 @Composable
-fun UserListItem(user: User, users: SnapshotStateList<User>) {
+fun UserInformation(user: User?) {
+    if (user == null) {
+        return
+    }
+
+    Column {
+        Row (verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Face,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+            Column (modifier = Modifier.padding(horizontal = 7.dp)){
+                Text(text = user.firstName, fontSize = 20.sp)
+                Text(text = user.activeToString(), fontSize = 14.sp, color = Color.DarkGray)
+            }
+        }
+    }
+
+
+
+}
+
+@Composable
+fun UserListItem(user: User, users: SnapshotStateList<User>, userDetailsUser: MutableState<User?>) {
     Column (modifier = Modifier
         .padding(vertical = 5.dp)
         .background(color = Color(red = 240, green = 240, blue = 245))
@@ -142,20 +174,9 @@ fun UserListItem(user: User, users: SnapshotStateList<User>) {
         Row (modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 10.dp)
             .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
-            Row (verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
-                Column (modifier = Modifier.padding(horizontal = 7.dp)){
-                    Text(text = user.firstName, fontSize = 20.sp)
-                    Text(text = user.activeToString(), fontSize = 14.sp, color = Color.DarkGray)
-                }
-            }
-            Button(onClick = { users.removeAll {currentUser ->  currentUser.firstName == user.firstName} }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+            UserInformation(user = user)
+            TextButton(onClick = { userDetailsUser.value = user }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
             }
         }
     }
@@ -163,17 +184,51 @@ fun UserListItem(user: User, users: SnapshotStateList<User>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteUserDialog(visible: MutableState<Boolean>) {
+fun DeleteUserDialog(deleteUserDialogUser: MutableState<String>, users: SnapshotStateList<User>, userDetailsUser: MutableState<User?>) {
+    if (deleteUserDialogUser.value.isEmpty()) {
+        return
+    }
+
     AlertDialog(
         icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null )},
         title = { Text(text = "Delete User")},
         text = { Text(text = "Do you really want to delete this user?")},
-        confirmButton = { TextButton(onClick = { visible.value = false }) {
+        confirmButton = { TextButton(onClick = {
+            users.removeAll { currentUser -> currentUser.firstName.equals(deleteUserDialogUser.value) }
+            deleteUserDialogUser.value = ""
+            userDetailsUser.value = null
+        }) {
             Text(text = "Delete")
         }},
-        dismissButton = { TextButton(onClick = { visible.value = false }) {
+        dismissButton = { TextButton(onClick = { deleteUserDialogUser.value = "" }) {
             Text(text = "Cancel")
         }},
-        onDismissRequest = { visible.value = false }
+        onDismissRequest = { deleteUserDialogUser.value = "" }
     );
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: MutableState<String>) {
+    if (userDetailsUser.value == null) {
+        return
+    }
+
+    ModalBottomSheet(onDismissRequest = { userDetailsUser.value = null }) {
+        Column {
+            UserInformation(user = userDetailsUser.value)
+        }
+        Column {
+            Button(onClick = { deleteUserDialogUser.value = userDetailsUser.value!!.firstName }) {
+                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+            }
+        }
+    }
+}
+
+@Composable
+fun AddUser() {
+    FloatingActionButton(onClick = { /*TODO*/ }, shape = CircleShape) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+    }
 }
