@@ -18,12 +18,17 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +38,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -48,9 +55,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import at.tugraz.iti.mcl.project.ui.theme.ProjectTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -76,13 +85,33 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf(false)
                     }
 
-                    Scaffold (floatingActionButton = { AddUser(createUserFormVisible) }){ innerPadding ->
+                    val recognizeUserDialogVisible = remember {
+                        mutableStateOf(false)
+                    }
+
+                    Scaffold (
+                        topBar = { TopAppBar(
+                            title = { Text(text = "User Profiles")},
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                titleContentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            actions = {
+                                TextButton(onClick = { recognizeUserDialogVisible.value = true }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                                        Text(text = "Recognize", modifier = Modifier.padding(start = 5.dp))
+                                    }
+                                }
+                            }
+                        )},
+                        floatingActionButton = { AddUser(createUserFormVisible) }
+                    ){ innerPadding ->
                         Column (modifier = Modifier.padding(innerPadding)){
                             DeleteUserDialog(deleteUserDialogUser, users, userDetailsUser)
+                            RecognizeUserDialog(recognizeUserDialogVisible = recognizeUserDialogVisible)
                             UserDetails(userDetailsUser, deleteUserDialogUser)
                             CreateUserForm(users, createUserFormVisible)
-                            // AddUser()
-                            Title()
                             UserList(users, userDetailsUser)
                         }
                     }
@@ -92,13 +121,54 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Title() {
-    Text(
-        text = "Known Users",
-        fontSize = 25.sp,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)
-    )
+fun RecognizeUserDialog(recognizeUserDialogVisible: MutableState<Boolean>) {
+    if (!recognizeUserDialogVisible.value) {
+        return
+    }
+
+    val userDetailsUser = remember {
+        mutableStateOf<User?>(null)
+    }
+
+    Dialog(onDismissRequest = { recognizeUserDialogVisible.value = false }) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 35.dp)
+                    .padding(top = 35.dp)
+                    .padding(bottom = 25.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 15.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(35.dp).padding(end = 5.dp)
+                    )
+                    Text(text = "Recognize User", fontSize = 18.sp)
+                }
+                Text(text = "Processing sensor data to recognize user...")
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 15.dp)
+                ) {
+                    Row(modifier = Modifier.padding(horizontal = 25.dp, vertical = 25.dp)) {
+                        Icon(imageVector = Icons.Default.Face, contentDescription = null)
+                        Text(text = "Unknown User", modifier = Modifier.padding(start = 5.dp))
+                    }
+                }
+                TextButton(onClick = { recognizeUserDialogVisible.value = false }) {
+                    Text(text = "Done")
+                }
+            }
+        }
+    }
 }
 
 @Composable
