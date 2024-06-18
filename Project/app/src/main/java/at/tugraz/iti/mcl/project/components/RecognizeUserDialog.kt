@@ -33,34 +33,24 @@ fun RecognizeUserDialog(recognizeUserDialogVisible: MutableState<Boolean>) {
     }
 
     Dialog(onDismissRequest = { recognizeUserDialogVisible.value = false }) {
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 35.dp)
-                    .padding(top = 35.dp)
-                    .padding(bottom = 25.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 15.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .padding(end = 5.dp)
-                    )
-                    Text(text = "Recognize User", fontSize = 18.sp)
-                }
-                Text(text = "Processing sensor data to recognize user...")
+        DialogContent(
+            icon = Icons.Default.Person,
+            title = "Recognize User",
+            text = "Processing sensor data to recognize user...",
+            doneButtonOnClick = { recognizeUserDialogVisible.value = false },
+            content = {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 15.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 25.dp, vertical = 10.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 25.dp, vertical = 10.dp)
+                    ) {
                         Icon(imageVector = Icons.Default.Face, contentDescription = null)
                         Text(text = "Unknown User", modifier = Modifier
                             .padding(start = 5.dp)
@@ -70,13 +60,7 @@ fun RecognizeUserDialog(recognizeUserDialogVisible: MutableState<Boolean>) {
                             .padding(top = 20.dp))
                     }
                 }
-
-                Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = { recognizeUserDialogVisible.value = false }) {
-                        Text(text = "Done")
-                    }
-                }
             }
-        }
+        )
     }
 }

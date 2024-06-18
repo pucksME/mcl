@@ -18,7 +18,11 @@ import at.tugraz.iti.mcl.project.User
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: MutableState<String>) {
+fun UserDetails(
+    userDetailsUser: MutableState<User?>,
+    deleteUserDialogUser: MutableState<String>,
+    authenticateUserDialogUser: MutableState<User?>
+) {
     if (userDetailsUser.value == null) {
         return
     }
@@ -35,7 +39,7 @@ fun UserDetails(userDetailsUser: MutableState<User?>, deleteUserDialogUser: Muta
                     IconTextButton(
                         imageVector = Icons.Default.Lock,
                         text = "Authenticate",
-                        onClick = {},
+                        onClick = { authenticateUserDialogUser.value = userDetailsUser.value },
                         modifier = Modifier.padding(end = 10.dp)
                     )
                     IconTextButton(
