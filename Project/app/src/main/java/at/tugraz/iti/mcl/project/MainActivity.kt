@@ -1,5 +1,8 @@
 package at.tugraz.iti.mcl.project
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +24,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -67,6 +71,12 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf<User?>(null)
                     }
 
+                    val sensorData = remember {
+                        mutableStateListOf<Array<Float>>()
+                    }
+
+                    initSensor(sensorData)
+
                     Scaffold (
                         topBar = { TopAppBar(
                             title = { Text(text = "User Profiles")},
@@ -87,8 +97,8 @@ class MainActivity : ComponentActivity() {
                     ){ innerPadding ->
                         Column (modifier = Modifier.padding(innerPadding)){
                             DeleteUserDialog(deleteUserDialogUser, users, userDetailsUser)
-                            RecognizeUserDialog(recognizeUserDialogVisible = recognizeUserDialogVisible)
-                            AuthenticateUserDialog(authenticateUserDialogUser = authenticateUserDialogUser)
+                            RecognizeUserDialog(recognizeUserDialogVisible = recognizeUserDialogVisible, sensorData)
+                            AuthenticateUserDialog(authenticateUserDialogUser = authenticateUserDialogUser, sensorData)
                             UserDetails(userDetailsUser, deleteUserDialogUser, authenticateUserDialogUser)
                             CreateUserForm(users, createUserFormVisible)
                             UserList(users, userDetailsUser)
@@ -97,5 +107,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun initSensor(sensorData: SnapshotStateList<Array<Float>>) {
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        sensorManager.registerListener(AccelerationSensorEventListener(sensorData), sensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 }
