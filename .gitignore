@@ -11,3 +11,12 @@
 **/*.toc
 **/.idea
 **/.gradle
+
+
+# ignore common compiled python files
+*.pyc
+**/venv/
+**/old/
+
+**/WISDM_at_v2.0/*
+!**/WISDM_at_v2.0/*0_raw.txt
