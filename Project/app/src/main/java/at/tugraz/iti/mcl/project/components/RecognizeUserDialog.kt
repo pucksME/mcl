@@ -11,6 +11,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -18,19 +19,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import at.tugraz.iti.mcl.project.User
+import at.tugraz.iti.mcl.project.data
 
 @Composable
-fun RecognizeUserDialog(recognizeUserDialogVisible: MutableState<Boolean>, sensorData: SnapshotStateList<Array<Float>>) {
+fun RecognizeUserDialog(
+    recognizeUserDialogVisible: MutableState<Boolean>,
+    sensorData: SnapshotStateList<Array<Float>>,
+    recognizedUser: MutableState<User?>
+) {
     if (!recognizeUserDialogVisible.value) {
         return
     }
 
-    Dialog(onDismissRequest = { recognizeUserDialogVisible.value = false }) {
+    data.clear()
+
+    fun done() {
+        recognizeUserDialogVisible.value = false
+        recognizedUser.value = null
+    }
+
+    Dialog(onDismissRequest = { done() }) {
         DialogContent(
             icon = Icons.Default.Person,
             title = "Recognize User",
             text = "Processing sensor data to recognize user...",
-            doneButtonOnClick = { recognizeUserDialogVisible.value = false },
+            doneButtonOnClick = { done() },
             content = {
                 SensorData(sensorData = sensorData, modifier = Modifier.padding(bottom = 25.dp))
                 Card(
@@ -46,12 +60,11 @@ fun RecognizeUserDialog(recognizeUserDialogVisible: MutableState<Boolean>, senso
                         modifier = Modifier.padding(horizontal = 25.dp, vertical = 15.dp)
                     ) {
                         Icon(imageVector = Icons.Default.Face, contentDescription = null)
-                        Text(text = "Unknown User", modifier = Modifier
+                        Text(text = if (recognizedUser.value == null) "Unknown User" else recognizedUser.value!!.firstName, modifier = Modifier
                             .padding(start = 5.dp)
                             .padding(end = 10.dp))
                     }
                 }
-
             }
         )
     }

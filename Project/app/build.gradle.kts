@@ -66,4 +66,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    //implementation(libs.tensorflow.lite.task.text.play.services)
+    implementation(libs.play.services.tflite.gpu)
 }

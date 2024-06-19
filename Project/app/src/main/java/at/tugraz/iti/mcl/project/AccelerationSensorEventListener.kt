@@ -3,11 +3,14 @@ package at.tugraz.iti.mcl.project
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import java.util.Date
 
 class AccelerationSensorEventListener(
-    private val sensorData: SnapshotStateList<Array<Float>>
+    private val data: ArrayList<Array<Float>>,
+    private val sensorData: SnapshotStateList<Array<Float>>,
+    private val recognizedUser: MutableState<User?>
 ) : SensorEventListener {
     private var updatedTime = Date().time
 
@@ -23,6 +26,13 @@ class AccelerationSensorEventListener(
         }
 
         sensorData.add(event.values.toTypedArray())
+        data.add(event.values.toTypedArray())
+
+        if (data.size / 40 >= 1) {
+            handleRecognizeUserDone(recognizedUser)
+        }
+
+        //System.out.println(data.size / 40)
 
         if (sensorData.size > 500) {
             sensorData.removeAt(0)
