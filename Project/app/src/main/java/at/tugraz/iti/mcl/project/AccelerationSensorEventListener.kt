@@ -10,7 +10,8 @@ import java.util.Date
 class AccelerationSensorEventListener(
     private val data: ArrayList<Array<Float>>,
     private val sensorData: SnapshotStateList<Array<Float>>,
-    private val recognizedUser: MutableState<User?>
+    private val recognizedUser: MutableState<User?>,
+    private val recognizeUserDialogVisible: MutableState<Boolean>
 ) : SensorEventListener {
     private var updatedTime = Date().time
 
@@ -28,7 +29,7 @@ class AccelerationSensorEventListener(
         sensorData.add(event.values.toTypedArray())
         data.add(event.values.toTypedArray())
 
-        if (data.size / 40 >= 1) {
+        if (recognizeUserDialogVisible.value && data.size / 40 >= 1) {
             handleRecognizeUserDone(recognizedUser)
         }
 

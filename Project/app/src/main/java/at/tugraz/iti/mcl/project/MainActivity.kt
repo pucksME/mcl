@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf("")
                     }
 
-                    initSensor(sensorData, recognizedUser)
+                    initSensor(sensorData, recognizedUser, recognizeUserDialogVisible)
 
                     Scaffold (
                         topBar = { TopAppBar(
@@ -160,10 +160,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initSensor(sensorData: SnapshotStateList<Array<Float>>, recognizedUser: MutableState<User?>) {
+    private fun initSensor(sensorData: SnapshotStateList<Array<Float>>, recognizedUser: MutableState<User?>, recognizeUserDialogVisible: MutableState<Boolean>) {
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-        sensorManager.registerListener(AccelerationSensorEventListener(data, sensorData, recognizedUser), sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(AccelerationSensorEventListener(data, sensorData, recognizedUser, recognizeUserDialogVisible), sensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     private fun tensorflow(sensorData: SnapshotStateList<Array<Float>>) {
