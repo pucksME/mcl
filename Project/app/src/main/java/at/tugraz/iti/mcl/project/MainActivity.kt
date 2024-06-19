@@ -32,6 +32,7 @@ import at.tugraz.iti.mcl.project.components.AddUser
 import at.tugraz.iti.mcl.project.components.AuthenticateUserDialog
 import at.tugraz.iti.mcl.project.components.CreateUserForm
 import at.tugraz.iti.mcl.project.components.DeleteUserDialog
+import at.tugraz.iti.mcl.project.components.LearnUserDialog
 import at.tugraz.iti.mcl.project.components.RecognizeUserDialog
 import at.tugraz.iti.mcl.project.components.UserDetails
 import at.tugraz.iti.mcl.project.components.UserList
@@ -71,6 +72,10 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf<User?>(null)
                     }
 
+                    val learnUserDialogUser = remember {
+                        mutableStateOf<User?>(null)
+                    }
+
                     val sensorData = remember {
                         mutableStateListOf<Array<Float>>()
                     }
@@ -97,9 +102,15 @@ class MainActivity : ComponentActivity() {
                     ){ innerPadding ->
                         Column (modifier = Modifier.padding(innerPadding)){
                             DeleteUserDialog(deleteUserDialogUser, users, userDetailsUser)
-                            RecognizeUserDialog(recognizeUserDialogVisible = recognizeUserDialogVisible, sensorData)
-                            AuthenticateUserDialog(authenticateUserDialogUser = authenticateUserDialogUser, sensorData)
-                            UserDetails(userDetailsUser, deleteUserDialogUser, authenticateUserDialogUser)
+                            RecognizeUserDialog(recognizeUserDialogVisible, sensorData)
+                            AuthenticateUserDialog(authenticateUserDialogUser, sensorData)
+                            LearnUserDialog(learnUserDialogUser, sensorData)
+                            UserDetails(
+                                userDetailsUser,
+                                deleteUserDialogUser,
+                                authenticateUserDialogUser,
+                                learnUserDialogUser
+                            )
                             CreateUserForm(users, createUserFormVisible)
                             UserList(users, userDetailsUser)
                         }

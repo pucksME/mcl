@@ -21,7 +21,8 @@ import at.tugraz.iti.mcl.project.User
 fun UserDetails(
     userDetailsUser: MutableState<User?>,
     deleteUserDialogUser: MutableState<String>,
-    authenticateUserDialogUser: MutableState<User?>
+    authenticateUserDialogUser: MutableState<User?>,
+    learnUserDialogUser: MutableState<User?>
 ) {
     if (userDetailsUser.value == null) {
         return
@@ -45,7 +46,7 @@ fun UserDetails(
                     IconTextButton(
                         imageVector = Icons.Default.Build,
                         text = "Learn",
-                        onClick = {},
+                        onClick = { learnUserDialogUser.value = userDetailsUser.value },
                         modifier = Modifier.padding(end = 10.dp)
                     )
                     IconTextButton(
