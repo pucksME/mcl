@@ -20,3 +20,12 @@
 
 **/WISDM_at_v2.0/*
 !**/WISDM_at_v2.0/*0_raw.txt
+
+**/logs/*
+
+**/new_model/*
+
+**/gait_cycle_lstm_2sec*
+
+
+**/new_model.tflite
