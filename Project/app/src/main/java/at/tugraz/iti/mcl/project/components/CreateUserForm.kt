@@ -40,6 +40,29 @@ fun CreateUserForm(users: SnapshotStateList<User>, createUserFormVisible: Mutabl
             mutableStateOf(false)
         }
 
+        val tooManyUsers = remember {
+            mutableStateOf(false)
+        }
+
+        fun getIsError(): Boolean {
+            return tooManyUsers.value || invalidInput.value
+        }
+
+        @Composable
+        fun SupportingText() {
+            if (!getIsError()) {
+                return
+            }
+
+            if (invalidInput.value) {
+                return Text(text = "Please choose a name")
+            }
+
+            if (tooManyUsers.value) {
+                return Text(text = "Too many users")
+            }
+        }
+
         Column(modifier = Modifier
             .padding(bottom = 50.dp)
             .padding(horizontal = 25.dp)) {
@@ -50,16 +73,19 @@ fun CreateUserForm(users: SnapshotStateList<User>, createUserFormVisible: Mutabl
                     value = firstname,
                     onValueChange = {value -> firstname = value},
                     label = { Text("First name") },
-                    isError = invalidInput.value,
-                    supportingText = { if (invalidInput.value) Text(text = "Please choose a name") },
+                    isError = getIsError(),
+                    supportingText = { SupportingText() },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Button(onClick = {
                     if (firstname.isEmpty()) {
                         invalidInput.value = true
+                    } else if (users.size >= 10) {
+                        tooManyUsers.value = true
                     } else {
                         invalidInput.value = false
+                        tooManyUsers.value = false
                         users.add(User(firstname, false))
                         createUserFormVisible.value = false
                     }
